@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select User - Movie List App</title>
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Use Inter font for a clean, modern look */
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <!-- Changed max-w-lg to max-w-md to narrow the card and achieve a max row length closer to 72 characters -->
+    <div class="w-full max-w-md bg-white shadow-2xl rounded-2xl p-8 space-y-8 border border-gray-100">
+        <h1 class="text-4xl font-black text-center text-indigo-700 tracking-tight">
+            Movie List App
+        </h1>
+        <p class="text-center text-gray-500">
+            Select an existing profile or create a new one to manage your movie list.
+        </p>
+
+        <!-- Message/Error Display -->
+        {% if error %}
+        <div class="{% if 'successfully deleted' in error|lower or 'created' in error|lower %}bg-green-100 border-green-400 text-green-700{% else %}bg-red-100 border-red-400 text-red-700{% endif %} px-4 py-3 rounded-xl relative border" role="alert">
+            <p class="font-medium">{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Register New User Section -->
+        <div class="border-t border-gray-200 pt-6 space-y-4">
+            <h2 class="text-xl font-bold text-gray-800">1. Register New User</h2>
+            <form method="POST" action="{{ url_for('register') }}" class="flex flex-col sm:flex-row gap-3">
+                <input type="text" name="username" placeholder="Enter New Username" required
+                       class="flex-grow p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 shadow-sm">
+                <button type="submit"
+                        class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-indigo-700 transition duration-150 shadow-lg">
+                    Create & Login
+                </button>
+            </form>
+        </div>
+
+        <!-- Select Existing User Section -->
+        <div class="border-t border-gray-200 pt-6 space-y-4">
+            <h2 class="text-xl font-bold text-gray-800">2. Select Existing User</h2>
+            {% if users %}
+            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                {% for user in users %}
+                <div class="flex items-center justify-between p-4 bg-white hover:bg-indigo-50 rounded-xl transition duration-150 border border-gray-200 shadow-md">
+                    <span class="font-semibold text-gray-800 text-lg">{{ user.username }}</span>
+                    <div class="flex space-x-2 items-center">
+
+                        <!-- Login Button -->
+                        <a href="{{ url_for('select_user', user_id=user.id) }}"
+                           class="text-sm text-white font-semibold py-2 px-4 rounded-lg bg-green-500 hover:bg-green-600 transition duration-150 shadow-md">
+                           Login
+                        </a>
+
+                        <!-- Delete Form (POST required for deletion) -->
+                        <form method="POST" action="{{ url_for('delete_user_route', user_id=user.id) }}"
+                              onsubmit="return confirm('Are you sure you want to permanently delete user {{ user.username }} and ALL their movies? This action cannot be undone.');">
+                            <button type="submit"
+                                    class="text-sm text-white font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 transition duration-150 shadow-md"
+                                    title="Delete User and all their movies">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 italic">No existing users found. Please register a new user above.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

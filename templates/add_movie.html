@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Movie - {{ g.user.username }}</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link to external custom styles using Flask's url_for -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Primary Application Header (Similar to main list page) -->
+    <header class="bg-indigo-700 shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Movie Tracker</h1>
+            <nav class="flex items-center space-x-4">
+                <span class="text-white text-sm font-medium hidden sm:inline">
+                    Logged in as: <strong class="text-indigo-200">{{ g.user.username }}</strong>
+                </span>
+                <a href="{{ url_for('user_select') }}"
+                   class="px-3 py-1.5 bg-indigo-500 text-white rounded-full text-sm font-semibold hover:bg-indigo-400 transition duration-150">
+                    Change User
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <div class="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
+
+            <!-- Back Button and Page Title -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-4">
+                <a href="{{ url_for('movie_list') }}"
+                   class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition duration-150 font-medium text-lg">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Movie List
+                </a>
+                <h2 class="text-2xl font-extrabold text-gray-800 mt-2 sm:mt-0">
+                    Add New Movie
+                </h2>
+            </div>
+
+
+            <!-- Search Form -->
+            <div class="space-y-4">
+                <h3 class="text-xl font-semibold text-gray-700">Search OMDb by Title</h3>
+                <form method="POST" action="{{ url_for('movie_add') }}" class="flex flex-col md:flex-row gap-3">
+                    <input type="text" name="movie_title" placeholder="Enter movie title (e.g., Inception, Parasite)" required
+                           class="flex-grow p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 text-gray-700">
+                    <button type="submit"
+                            class="bg-indigo-600 text-white font-medium py-3 px-6 rounded-xl hover:bg-indigo-700 transition duration-150 shadow-lg flex-shrink-0">
+                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Search
+                    </button>
+                </form>
+            </div>
+
+
+            <!-- Messages & Results Area -->
+            <div class="space-y-4 pt-4 border-t border-gray-100">
+                <!-- Error Display -->
+                {% if error %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative" role="alert">
+                    <strong class="font-bold">Error:</strong>
+                    <span class="block sm:inline">{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Success/Info Message Display -->
+                {% if message %}
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative" role="alert">
+                    <strong class="font-bold">Success:</strong>
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Search Result Display -->
+                {% if search_result %}
+                <div class="p-5 border border-indigo-200 rounded-xl flex flex-col md:flex-row gap-6 bg-indigo-50">
+                    <img src="{{ search_result.Poster | default('https://placehold.co/150x220/8b5cf6/ffffff?text=No+Poster', true) }}"
+                         alt="Poster for {{ search_result.Title }}"
+                         class="w-full md:w-32 h-auto rounded-lg shadow-xl flex-shrink-0 object-cover mx-auto md:mx-0"
+                         onerror="this.onerror=null;this.src='https://placehold.co/150x220/8b5cf6/ffffff?text=No+Poster';">
+
+                    <div class="flex-grow space-y-3">
+                        <h3 class="text-2xl font-bold text-indigo-800">{{ search_result.Title }} ({{ search_result.Year }})</h3>
+                        <p class="text-base text-gray-700">{{ search_result.Plot }}</p>
+                        <p class="text-sm text-gray-500 border-t border-gray-300 pt-2">
+                            Director: <span class="font-medium">{{ search_result.Director }}</span> | Released: {{ search_result.Released }}
+                        </p>
+
+                        <!-- Confirmation Form -->
+                        <form method="POST" action="{{ url_for('movie_add') }}" class="pt-3">
+                            <!-- Hidden field to send the OMDb ID for final database entry -->
+                            <input type="hidden" name="omdb_id" value="{{ search_result.imdbID }}">
+                            <button type="submit"
+                                    class="bg-green-600 text-white font-medium py-2.5 px-5 rounded-xl hover:bg-green-700 transition duration-150 shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">
+                                Add "{{ search_result.Title }}" to My List
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-8 text-center bg-gray-50 rounded-xl">
+                    <p class="text-gray-500 italic">Enter a movie title above and click 'Search' to find and add a movie to your list.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Optional Footer -->
+    <footer class="mt-8 py-4 text-center text-sm text-gray-500">
+        &copy; 2025 Movie Tracker App | Current User ID: {{ g.user.id }}
+    </footer>
+
+</body>
+</html>

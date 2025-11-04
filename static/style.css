@@ -1,0 +1,19 @@
+/*
+This file contains custom CSS rules not handled by Tailwind.
+All utility classes (like background color, padding, flex, etc.) remain in the HTML.
+*/
+body {
+    /* Sets the global font to Inter, as defined in the original HTML */
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+}
+
+
+.navbar-brand {
+    font-weight: 700;
+}
+
+.container {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
