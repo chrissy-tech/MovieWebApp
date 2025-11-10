@@ -10,17 +10,7 @@
         <div class="col-md-8 col-lg-6">
             <h2 class="mb-4">Update Details for <span class="text-primary">{{ movie.title }} ({{ movie.year }})</span></h2>
 
-            {% if error %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-            {% endif %}
-
-            {% if message %}
-            <div class="alert alert-success" role="alert">
-                {{ message }}
-            </div>
-            {% endif %}
+            <!-- Die Logik für Fehler/Nachrichten wurde in base.html verschoben, um das Flashing-Problem zu lösen. -->
 
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
@@ -110,7 +100,7 @@
                 if (clickedRating === 1 && parseInt(ratingInput.value) === 1) {
                     clickedRating = 0;
                 } else if (clickedRating === parseInt(ratingInput.value)) {
-
+                    // Clicking the same star does nothing unless it's the first star being unrated
                 }
 
                 ratingInput.value = clickedRating;
