@@ -274,8 +274,6 @@ def create_app():
 		movie = db.session.get(Movie, movie_id)
 
 		if not movie or movie.user_id != g.user.id:
-			flash("Movie not found or you don't have permission.",
-				  'danger')
 			return redirect(url_for('movie_list'))
 
 		if request.method == 'POST':
@@ -296,12 +294,9 @@ def create_app():
 					if 0 <= rating_int <= 5:
 						update_data['rating'] = rating_int
 					else:
-						flash('Rating must be between 0 and 5.',
-							  'danger')
 						return render_template('movie_update.html',
 											   movie=movie)
 				except (ValueError, TypeError):
-					flash('Invalid rating value.', 'danger')
 					return render_template('movie_update.html',
 										   movie=movie)
 
@@ -311,7 +306,7 @@ def create_app():
 				if new_status in valid_statuses:
 					update_data['status'] = new_status
 				else:
-					flash('Invalid status value.', 'danger')
+					flash('Invalid status value.')
 					return render_template('movie_update.html',
 										   movie=movie)
 
@@ -327,7 +322,6 @@ def create_app():
 					return redirect(url_for('movie_list'))
 				else:
 					flash(db_error or 'Failed to update movie.',
-						  'danger')
 			else:
 				flash('No changes submitted.', 'info')
 				return redirect(url_for('movie_list'))
@@ -338,7 +332,6 @@ def create_app():
 	@app.errorhandler(404)
 	def not_found(error):
 		"""Handle 404 errors."""
-		flash('Page not found.', 'danger')
 		return redirect(url_for('user_select'))
 
 	@app.errorhandler(500)
@@ -346,8 +339,6 @@ def create_app():
 		"""Handle 500 errors."""
 		db.session.rollback()
 		logger.error(f"Internal error: {error}")
-		flash('An internal error occurred. Please try again.',
-			  'danger')
 		return redirect(url_for('user_select'))
 
 	return app
