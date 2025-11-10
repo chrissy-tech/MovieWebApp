@@ -1,8 +1,3 @@
-"""
-Movie Tracker Web Application
-A Flask-based application for managing personal movie watchlists.
-"""
-
 import functools
 import logging
 from typing import Tuple, Optional, Dict, Any
@@ -41,18 +36,10 @@ def get_omdb_details(api_key: str, omdb_url: str,
 	Optional[Dict[str, Any]], Optional[str]]:
 	"""
 	Fetches movie details from the OMDb API.
-
-	Args:
-		api_key: OMDb API key
-		omdb_url: Base URL for OMDb API
-		movie_id: IMDb movie ID (optional)
-		title: Movie title to search (optional)
-
-	Returns:
-		Tuple of (data dict, error message)
 	"""
 	if api_key == 'YOUR_OMDB_API_KEY_FALLBACK':
-		return None, "OMDb API Key is not configured. Please set OMDB_API_KEY environment variable."
+		return None, ("OMDb API Key is not configured. "
+					  "Please set OMDB_API_KEY environment variable.")
 
 	params = {'apikey': api_key}
 
@@ -83,12 +70,6 @@ def get_omdb_details(api_key: str, omdb_url: str,
 def render_stars(rating: Optional[int]) -> str:
 	"""
 	Converts an integer rating (0-5) into a Unicode star string.
-
-	Args:
-		rating: Integer rating between 0 and 5
-
-	Returns:
-		String of filled and empty stars, or "Unrated"
 	"""
 	if rating is None or rating == 0:
 		return "Unrated"
@@ -114,9 +95,6 @@ def create_app():
 	# Register template helper function
 	app.jinja_env.globals.update(render_stars=render_stars)
 
-	# -------------------------------------------------------------------------
-	# CLI Commands
-	# -------------------------------------------------------------------------
 
 	@app.cli.command("init-db")
 	def init_db_command():
@@ -125,19 +103,11 @@ def create_app():
 			db.create_all()
 		click.echo('✓ Database initialized successfully.')
 
-	# -------------------------------------------------------------------------
-	# Before Request Hook
-	# -------------------------------------------------------------------------
-
 	@app.before_request
 	def load_logged_in_user():
 		"""Loads the current user from session before each request."""
 		user_id = session.get('user_id')
 		g.user = db.session.get(User, user_id) if user_id else None
-
-	# -------------------------------------------------------------------------
-	# User Management Routes
-	# -------------------------------------------------------------------------
 
 	@app.route('/')
 	def user_select():
@@ -207,10 +177,6 @@ def create_app():
 			return redirect(url_for('user_select',
 									error=f"Error deleting user: {error}"))
 
-	# -------------------------------------------------------------------------
-	# Movie Management Routes
-	# -------------------------------------------------------------------------
-
 	@app.route('/movies')
 	@login_required
 	def movie_list():
@@ -275,7 +241,8 @@ def create_app():
 					)
 
 					if search_result:
-						message = f"Found: {search_result.get('Title')} ({search_result.get('Year')})"
+						message = (f"Found: {search_result.get('Title')} "
+								   f"({search_result.get('Year')})")
 					else:
 						error = api_error
 				else:
@@ -367,10 +334,6 @@ def create_app():
 
 		# GET request - display form
 		return render_template('movie_update.html', movie=movie)
-
-	# -------------------------------------------------------------------------
-	# Error Handlers
-	# -------------------------------------------------------------------------
 
 	@app.errorhandler(404)
 	def not_found(error):

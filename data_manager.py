@@ -2,7 +2,6 @@ from models import db, User, Movie
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
-
 class DataManager:
 
 	@staticmethod
@@ -56,7 +55,8 @@ class DataManager:
 
 	@staticmethod
 	def get_movie_by_id(movie_id, user_id):
-		"""Returns a single Movie object by ID, ensuring it belongs to the user."""
+		"""Returns a single Movie object by ID,
+		ensuring it belongs to the user."""
 		return db.session.execute(
 			db.select(Movie).filter_by(id=movie_id, user_id=user_id)
 		).scalar_one_or_none()
@@ -95,7 +95,8 @@ class DataManager:
 		except Exception as e:
 			db.session.rollback()
 			print(f"Error adding movie: {e}")
-			return None, "An unexpected database error occurred while adding the movie."
+			return None, ("An unexpected database "
+						  "error occurred while adding the movie.")
 
 	@staticmethod
 	def delete_movie(movie_id, user_id):
@@ -111,7 +112,8 @@ class DataManager:
 				db.session.commit()
 				return True, None
 			else:
-				return False, "Movie not found or does not belong to the current user."
+				return False, ("Movie not found or does "
+							   "not belong to the current user.")
 		except Exception as e:
 			db.session.rollback()
 			return False, f"Database error during movie deletion: {e}"
@@ -127,7 +129,8 @@ class DataManager:
 			).scalar_one_or_none()
 
 			if not movie:
-				return None, "Movie not found or does not belong to the current user."
+				return (None, "Movie not found or does"
+							  " not belong to the current user.")
 
 			print(
 				f"DEBUG DataManager - Before update: rating={movie.rating}")
@@ -148,7 +151,8 @@ class DataManager:
 			db.session.refresh(movie)
 
 			print(
-				f"DEBUG DataManager - After commit & refresh: rating={movie.rating}")
+				f"DEBUG DataManager - After commit & "
+				f"refresh: rating={movie.rating}")
 
 			return movie, None
 		except Exception as e:

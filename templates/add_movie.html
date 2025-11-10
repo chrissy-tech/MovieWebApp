@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Movie - {{ g.user.username }}</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Link to external custom styles using Flask's url_for -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="bg-gray-100 min-h-screen">
-
-    <!-- Primary Application Header (Similar to main list page) -->
     <header class="bg-indigo-700 shadow-lg sticky top-0 z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-white">Movie Tracker</h1>
@@ -28,10 +24,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-
         <div class="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 sm:p-8 space-y-6">
-
-            <!-- Back Button and Page Title -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-4">
                 <a href="{{ url_for('movie_list') }}"
                    class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition duration-150 font-medium text-lg">
@@ -44,9 +37,6 @@
                     Add New Movie
                 </h2>
             </div>
-
-
-            <!-- Search Form -->
             <div class="space-y-4">
                 <h3 class="text-xl font-semibold text-gray-700">Search OMDb by Title</h3>
                 <form method="POST" action="{{ url_for('movie_add') }}" class="flex flex-col md:flex-row gap-3">
@@ -60,10 +50,7 @@
                 </form>
             </div>
 
-
-            <!-- Messages & Results Area -->
             <div class="space-y-4 pt-4 border-t border-gray-100">
-                <!-- Error Display -->
                 {% if error %}
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative" role="alert">
                     <strong class="font-bold">Error:</strong>
@@ -71,7 +58,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Success/Info Message Display -->
                 {% if message %}
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative" role="alert">
                     <strong class="font-bold">Success:</strong>
@@ -79,7 +65,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Search Result Display -->
                 {% if search_result %}
                 <div class="p-5 border border-indigo-200 rounded-xl flex flex-col md:flex-row gap-6 bg-indigo-50">
                     <img src="{{ search_result.Poster | default('https://placehold.co/150x220/8b5cf6/ffffff?text=No+Poster', true) }}"
@@ -94,9 +79,7 @@
                             Director: <span class="font-medium">{{ search_result.Director }}</span> | Released: {{ search_result.Released }}
                         </p>
 
-                        <!-- Confirmation Form -->
                         <form method="POST" action="{{ url_for('movie_add') }}" class="pt-3">
-                            <!-- Hidden field to send the OMDb ID for final database entry -->
                             <input type="hidden" name="omdb_id" value="{{ search_result.imdbID }}">
                             <button type="submit"
                                     class="bg-green-600 text-white font-medium py-2.5 px-5 rounded-xl hover:bg-green-700 transition duration-150 shadow-lg transform hover:scale-[1.02] active:scale-[0.98]">

@@ -4,36 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Movie List - {{ g.user.username }}</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Keeping the local style link just in case, though Tailwind is preferred -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* The render_stars function uses plain Unicode stars (★ and ☆),
-           so we don't need the specific Font Awesome classes here,
-           but we can style the text color if needed. */
+
         .rating-text {
-             /* Use an amber color for the star text for visibility */
-            color: #F59E0B; /* Tailwind amber-500 */
-            font-size: 1.5rem; /* Make the stars stand out */
+
+            color: #F59E0B;
+            font-size: 1.5rem;
             letter-spacing: 2px;
         }
     </style>
 </head>
-<!-- Shifted background to a deep slate blue for a dark theme -->
 <body class="bg-slate-900 min-h-screen font-sans text-gray-100">
 
-    <!-- Primary Application Header (Deep Blue Theme) -->
     <header class="bg-gray-900 shadow-xl sticky top-0 z-10 border-b-4 border-cyan-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
 
-            <!-- Logo/Branding Section (Upper Left Corner) -->
             <div class="flex items-center space-x-3">
-                <!-- Placeholder Logo Image (Amber/Gold Accent) -->
                 <img src="https://placehold.co/40x40/f97316/ffffff?text=M" alt="MoviWeb Logo" class="rounded-full shadow-lg border-2 border-amber-400">
-                <!-- Stylized Title with Cyan/Amber color split -->
                 <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">Movi<span class="text-amber-400">Tracker</span></h1>
             </div>
 
@@ -41,7 +31,7 @@
                 <span class="text-gray-300 text-sm font-medium hidden sm:inline">
                     Logged in as: <strong class="text-cyan-400">{{ g.user.username }}</strong>
                 </span>
-                <!-- Updated 'Change User' button with icon and darker style -->
+
                 <a href="{{ url_for('user_select') }}"
                    class="px-3 py-1.5 bg-gray-700 text-white rounded-full text-sm font-semibold hover:bg-gray-600 transition duration-150 flex items-center">
                    <i class="fas fa-user-circle mr-2"></i>
@@ -53,15 +43,12 @@
 
     <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        <!-- Main Content Wrapper (Dark card background) -->
         <div class="w-full max-w-4xl mx-auto bg-gray-800 shadow-2xl rounded-2xl p-6 sm:p-8 space-y-8">
 
-            <!-- Title and Add Button -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-700 pb-4">
                 <h2 class="text-3xl font-extrabold text-white">
                     Your Watch List
                 </h2>
-                <!-- Add Button (Using Amber Accent Color and Icon) -->
                 <a href="{{ url_for('movie_add') }}"
                    class="bg-amber-500 text-gray-900 font-bold py-2.5 px-5 rounded-full hover:bg-amber-400 transition duration-150 shadow-xl mt-3 sm:mt-0 inline-flex items-center transform hover:scale-[1.02]">
                     <i class="fas fa-plus-circle mr-2"></i>
@@ -69,11 +56,9 @@
                 </a>
             </div>
 
-            <!-- Movie List Grid/Loop -->
             <div class="space-y-6">
                 {% if movies %}
                     {% for movie in movies %}
-                    <!-- Movie Card (Dark background, subtle border, large shadow) -->
                     <div class="p-4 border border-gray-700 rounded-xl flex flex-col sm:flex-row gap-4 bg-gray-900 shadow-xl hover:border-cyan-400 transition duration-300">
 
                         <img src="{{ movie.poster_url | default('https://placehold.co/120x180/1f2937/ffffff?text=No+Poster', true) }}"
@@ -84,10 +69,8 @@
                         <div class="flex-grow space-y-2">
                             <h3 class="text-xl font-bold text-cyan-400">{{ movie.title }} ({{ movie.year }})</h3>
 
-                            <!-- Status & Rating Badges -->
                             <div class="flex items-center space-x-3 text-sm">
 
-                                <!-- Status Badge (Updated Colors for Dark Theme) -->
                                 <span class="px-3 py-1 rounded-full font-semibold
                                     {% if movie.status == 'Watched' %} bg-cyan-800 text-cyan-200
                                     {% elif movie.status == 'Watching' %} bg-yellow-800 text-yellow-200
@@ -96,30 +79,21 @@
                                     {{ movie.status }}
                                 </span>
 
-                                <!-- NEW FIX: Rating Display Logic using the render_stars helper function -->
                                 {% set star_output = render_stars(movie.rating) %}
 
                                 <span class="rating-text" title="Rating: {{ star_output }}">
-                                    <!-- This will output: ★★★☆☆ or Unrated -->
                                     {{ star_output }}
                                 </span>
 
-                                <!-- The old, complex Font Awesome loop has been replaced by the simple function call -->
-
                             </div>
-
                             <p class="text-sm text-gray-400 line-clamp-2">{{ movie.plot }}</p>
-
-                            <!-- Actions -->
                             <div class="pt-2 flex flex-col sm:flex-row gap-3">
-                                <!-- Edit Button (Using Cyan Accent Color and Icon) -->
                                 <a href="{{ url_for('movie_update', movie_id=movie.id) }}"
                                    class="bg-cyan-600 text-white text-sm py-2 px-4 rounded-xl font-medium hover:bg-cyan-500 transition duration-150 shadow-md flex items-center justify-center sm:justify-start">
                                     <i class="fas fa-edit mr-2"></i>
                                     Edit Status/Rating
                                 </a>
 
-                                <!-- Delete Button (using a form for POST request, Red Color and Icon) -->
                                 <form method="POST" action="{{ url_for('movie_delete', movie_id=movie.id) }}" class="inline">
                                     <button type="submit"
                                             onclick="return confirm('Are you sure you want to delete {{ movie.title }}?')"
@@ -133,7 +107,6 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <!-- Empty List Message (Updated Colors for Dark Theme) -->
                     <div class="p-10 text-center bg-gray-900 rounded-xl border-2 border-dashed border-cyan-500/50">
                         <p class="text-xl font-semibold text-cyan-400 mb-2">Your list is currently empty!</p>
                         <p class="text-gray-400">Click the "Add a New Movie" button above to get started.</p>
@@ -145,7 +118,6 @@
 
     </main>
 
-    <!-- Optional Footer -->
     <footer class="mt-8 py-4 text-center text-sm text-gray-500">
         &copy; 2025 Movie Tracker App | Current User: {{ g.user.username }}
     </footer>

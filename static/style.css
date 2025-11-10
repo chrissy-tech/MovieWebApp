@@ -1,24 +1,13 @@
-MOVIE TRACKER - CUSTOM STYLES
-   All Tailwind utility classes remain in HTML templates
-   ============================================================================= */
-
-/* -----------------------------------------------------------------------------
-   GLOBAL STYLES
-   ----------------------------------------------------------------------------- */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
                  Roboto, sans-serif;
     background-color: #f8f9fa;
 }
 
-/* Remove default focus outline and use custom focus styles */
 *:focus {
     outline: none;
 }
 
-/* -----------------------------------------------------------------------------
-   STAR RATING SYSTEM (Interactive - for movie_update.html)
-   ----------------------------------------------------------------------------- */
 .star-rating {
     display: inline-flex;
     gap: 8px;
@@ -30,68 +19,51 @@ body {
 
 .star {
     transition: all 0.2s ease-in-out;
-    color: #d1d5db; /* Tailwind gray-300 */
+    color: #d1d5db;
     cursor: pointer;
     line-height: 1;
 }
 
 .star.filled {
-    color: #fbbf24; /* Tailwind yellow-400 */
+    color: #fbbf24;
 }
 
 .star.hover {
-    color: #fcd34d; /* Tailwind yellow-300 */
+    color: #fcd34d;
     transform: scale(1.15);
 }
 
-/* Rating info text next to stars */
 .rating-info {
     display: inline-block;
     margin-left: 15px;
     font-size: 1.2rem;
-    color: #6b7280; /* Tailwind gray-500 */
+    color: #6b7280;
     vertical-align: middle;
     font-weight: 500;
 }
 
-/* -----------------------------------------------------------------------------
-   RATING DISPLAY (Read-only - for movie_list.html)
-   Used by render_stars() Python function
-   ----------------------------------------------------------------------------- */
 .rating-text {
-    color: #f59e0b; /* Tailwind amber-500 */
+    color: #f59e0b;
     font-size: 1.5rem;
     letter-spacing: 2px;
     font-weight: normal;
     display: inline-block;
 }
 
-/* Dark theme variant */
 .bg-slate-900 .rating-text {
-    color: #fbbf24; /* Tailwind yellow-400 - better contrast on dark bg */
+    color: #fbbf24;
 }
 
-/* -----------------------------------------------------------------------------
-   NAVBAR STYLES
-   ----------------------------------------------------------------------------- */
 .navbar-brand {
     font-weight: 700;
     letter-spacing: -0.5px;
 }
 
-/* -----------------------------------------------------------------------------
-   CONTAINER & LAYOUT
-   ----------------------------------------------------------------------------- */
 .container {
     margin-top: 2rem;
     margin-bottom: 2rem;
 }
 
-/* -----------------------------------------------------------------------------
-   FORM ENHANCEMENTS
-   ----------------------------------------------------------------------------- */
-
-/* Smooth transitions for all form inputs */
 input[type="text"],
 input[type="email"],
 textarea,
@@ -99,30 +71,22 @@ select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Custom focus state for better UX */
 input[type="text"]:focus,
 input[type="email"]:focus,
 textarea:focus,
 select:focus {
-    border-color: #6366f1; /* Tailwind indigo-500 */
+    border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* -----------------------------------------------------------------------------
-   CARD HOVER EFFECTS
-   ----------------------------------------------------------------------------- */
 .hover\:border-cyan-400:hover {
     transition: border-color 0.3s ease;
 }
 
-/* -----------------------------------------------------------------------------
-   IMAGE LOADING STATES
-   ----------------------------------------------------------------------------- */
 img {
-    background-color: #e5e7eb; /* Tailwind gray-200 */
+    background-color: #e5e7eb;
 }
 
-/* Smooth image loading */
 img[src] {
     animation: fadeIn 0.3s ease-in;
 }
@@ -136,28 +100,17 @@ img[src] {
     }
 }
 
-/* -----------------------------------------------------------------------------
-   BUTTON ENHANCEMENTS
-   ----------------------------------------------------------------------------- */
-
-/* Prevent text selection on buttons */
 button,
 .btn {
     user-select: none;
 }
 
-/* Active state feedback */
 button:active,
 .btn:active {
     transform: scale(0.98);
     transition: transform 0.1s ease;
 }
 
-/* -----------------------------------------------------------------------------
-   UTILITY CLASSES (Complementing Tailwind)
-   ----------------------------------------------------------------------------- */
-
-/* Line clamping for longer text */
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -172,30 +125,24 @@ button:active,
     overflow: hidden;
 }
 
-/* -----------------------------------------------------------------------------
-   SCROLLBAR STYLING (for user list)
-   ----------------------------------------------------------------------------- */
 .overflow-y-auto::-webkit-scrollbar {
     width: 8px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-    background: #f3f4f6; /* Tailwind gray-100 */
+    background: #f3f4f6;
     border-radius: 10px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-    background: #d1d5db; /* Tailwind gray-300 */
+    background: #d1d5db;
     border-radius: 10px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af; /* Tailwind gray-400 */
+    background: #9ca3af;
 }
 
-/* -----------------------------------------------------------------------------
-   PRINT STYLES
-   ----------------------------------------------------------------------------- */
 @media print {
     .no-print {
         display: none !important;
@@ -206,21 +153,15 @@ button:active,
     }
 }
 
-/* -----------------------------------------------------------------------------
-   ACCESSIBILITY ENHANCEMENTS
-   ----------------------------------------------------------------------------- */
-
-/* Focus visible for keyboard navigation */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-    outline: 2px solid #6366f1; /* Tailwind indigo-500 */
+    outline: 2px solid #6366f1;
     outline-offset: 2px;
 }
 
-/* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -230,10 +171,6 @@ textarea:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
-
-/* -----------------------------------------------------------------------------
-   RESPONSIVE TYPOGRAPHY
-   ----------------------------------------------------------------------------- */
 @media (max-width: 640px) {
     .star-rating {
         font-size: 2rem;

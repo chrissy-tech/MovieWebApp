@@ -33,7 +33,6 @@
                 Edit: <span class="text-indigo-600">{{ movie.title }}</span>
             </h2>
 
-            <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -49,7 +48,6 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Movie Info Card -->
             <div class="border border-indigo-200 rounded-xl p-4 flex gap-4 bg-indigo-50/50">
                 <img src="{{ movie.poster_url | default('https://placehold.co/80x120/8b5cf6/ffffff?text=No+Poster', true) }}"
                      alt="Poster for {{ movie.title }}"
@@ -62,10 +60,8 @@
                 </div>
             </div>
 
-            <!-- Update Form -->
             <form method="POST" action="{{ url_for('movie_update', movie_id=movie.id) }}" id="movieForm" class="space-y-6">
 
-                <!-- 1. Status Dropdown -->
                 <div>
                     <label for="status" class="block text-lg font-medium text-gray-700 mb-2">
                         📺 Viewing Status
@@ -79,13 +75,11 @@
                     </select>
                 </div>
 
-                <!-- 2. Star Rating (SIMPLIFIED) -->
                 <div>
                     <label class="block text-lg font-medium text-gray-700 mb-3">
                         ⭐ Your Rating (Click Stars)
                     </label>
 
-                    <!-- Star Container -->
                     <div class="star-rating" id="starContainer">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -94,21 +88,17 @@
                         <span class="star" data-value="5">★</span>
                     </div>
 
-                    <!-- Rating Display -->
                     <span class="rating-info" id="ratingText">
                         <strong id="ratingValue">{{ movie.rating | default(0) }}</strong>/5
                     </span>
 
-                    <!-- Hidden Input (THIS is what gets submitted!) -->
                     <input type="hidden" name="rating" id="ratingInput" value="{{ movie.rating | default(0) }}">
 
-                    <!-- Debug Info -->
                     <p class="text-xs text-gray-400 mt-2">
                         Hidden input value: <span id="debugValue">{{ movie.rating | default(0) }}</span>
                     </p>
                 </div>
 
-                <!-- 3. Personal Review -->
                 <div>
                     <label for="plot" class="block text-lg font-medium text-gray-700 mb-2">
                         📝 Personal Review / Notes
@@ -118,7 +108,6 @@
                               placeholder="Write your thoughts about this movie...">{{ movie.plot | default('') }}</textarea>
                 </div>
 
-                <!-- Submit Button -->
                 <div>
                     <button type="submit"
                             class="w-full bg-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-indigo-700 transition duration-200 shadow-lg text-lg">
@@ -130,8 +119,6 @@
         </div>
 
     </main>
-
-    <!-- SIMPLIFIED JavaScript -->
     <script src="{{ url_for('static', filename='rating.js') }}"></script>
 
 </body>
