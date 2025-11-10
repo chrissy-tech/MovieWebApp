@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Movie: {{ movie.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+    <header class="bg-indigo-700 shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Movie Tracker</h1>
+            <nav class="flex items-center space-x-4">
+                <a href="{{ url_for('movie_list') }}"
+                   class="px-3 py-1.5 bg-indigo-500 text-white rounded-full text-sm font-semibold hover:bg-indigo-400 transition duration-150">
+                    ← Back to List
+                </a>
+                <span class="text-white text-sm font-medium hidden sm:inline">
+                    Logged in as: <strong class="text-indigo-200">{{ g.user.username }}</strong>
+                </span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <div class="w-full max-w-2xl mx-auto bg-white shadow-2xl rounded-2xl p-6 sm:p-8 space-y-6">
+
+            <h2 class="text-3xl font-extrabold text-gray-800 border-b pb-4">
+                Edit: <span class="text-indigo-600">{{ movie.title }}</span>
+            </h2>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="px-4 py-3 rounded-lg relative
+                            {% if category == 'success' %} bg-green-100 border border-green-400 text-green-700
+                            {% elif category == 'danger' %} bg-red-100 border border-red-400 text-red-700
+                            {% else %} bg-blue-100 border border-blue-400 text-blue-700
+                            {% endif %}" role="alert">
+                            <strong class="font-bold">{{ category | capitalize }}!</strong>
+                            <span class="block sm:inline">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Movie Info Card -->
+            <div class="border border-indigo-200 rounded-xl p-4 flex gap-4 bg-indigo-50/50">
+                <img src="{{ movie.poster_url | default('https://placehold.co/80x120/8b5cf6/ffffff?text=No+Poster', true) }}"
+                     alt="Poster for {{ movie.title }}"
+                     class="w-20 h-30 rounded-lg shadow-md object-cover flex-shrink-0"
+                     onerror="this.onerror=null;this.src='https://placehold.co/80x120/8b5cf6/ffffff?text=No+Poster';">
+                <div class="flex-grow">
+                    <p class="text-lg font-semibold text-gray-800">{{ movie.title }} ({{ movie.year }})</p>
+                    <p class="text-sm text-gray-600">Director: {{ movie.director }}</p>
+                    <p class="text-xs text-gray-500 mt-2">Current DB Rating: <strong>{{ movie.rating }}/5</strong></p>
+                </div>
+            </div>
+
+            <!-- Update Form -->
+            <form method="POST" action="{{ url_for('movie_update', movie_id=movie.id) }}" id="movieForm" class="space-y-6">
+
+                <!-- 1. Status Dropdown -->
+                <div>
+                    <label for="status" class="block text-lg font-medium text-gray-700 mb-2">
+                        📺 Viewing Status
+                    </label>
+                    <select id="status" name="status" required
+                            class="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                        {% set statuses = ['Planning to Watch', 'Watching', 'Watched'] %}
+                        {% for s in statuses %}
+                            <option value="{{ s }}" {% if movie.status == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 2. Star Rating (SIMPLIFIED) -->
+                <div>
+                    <label class="block text-lg font-medium text-gray-700 mb-3">
+                        ⭐ Your Rating (Click Stars)
+                    </label>
+
+                    <!-- Star Container -->
+                    <div class="star-rating" id="starContainer">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+
+                    <!-- Rating Display -->
+                    <span class="rating-info" id="ratingText">
+                        <strong id="ratingValue">{{ movie.rating | default(0) }}</strong>/5
+                    </span>
+
+                    <!-- Hidden Input (THIS is what gets submitted!) -->
+                    <input type="hidden" name="rating" id="ratingInput" value="{{ movie.rating | default(0) }}">
+
+                    <!-- Debug Info -->
+                    <p class="text-xs text-gray-400 mt-2">
+                        Hidden input value: <span id="debugValue">{{ movie.rating | default(0) }}</span>
+                    </p>
+                </div>
+
+                <!-- 3. Personal Review -->
+                <div>
+                    <label for="plot" class="block text-lg font-medium text-gray-700 mb-2">
+                        📝 Personal Review / Notes
+                    </label>
+                    <textarea id="plot" name="plot" rows="5" required
+                              class="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm p-3 focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="Write your thoughts about this movie...">{{ movie.plot | default('') }}</textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                            class="w-full bg-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:bg-indigo-700 transition duration-200 shadow-lg text-lg">
+                        💾 Save Changes
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+    </main>
+
+    <!-- SIMPLIFIED JavaScript -->
+    <script src="{{ url_for('static', filename='rating.js') }}"></script>
+
+</body>
+</html>

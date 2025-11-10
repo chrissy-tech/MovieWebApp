@@ -3,6 +3,8 @@
 {% block title %}Update Movie: {{ movie.title }}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
@@ -39,6 +41,34 @@
 
             <!-- Form submits back to the same route for POST handling -->
             <form method="POST" action="{{ url_for('movie_update', movie_id=movie.id) }}">
+
+                <!-- Status Dropdown -->
+                <div class="mb-3">
+                    <label for="status" class="form-label">Viewing Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        {% set statuses = ['Planning to Watch', 'Watching', 'Watched'] %}
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {% if movie.status == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Rating Section -->
+                <div class="mb-4">
+                    <label class="form-label d-block">Your Rating (0-5 Stars)</label>
+                    <div class="star-rating d-flex align-items-center">
+                        <span class="stars" data-current-rating="{{ movie.rating }}">
+                            {% for i in range(1, 6) %}
+                            <span class="star" data-value="{{ i }}"></span>
+                            {% endfor %}
+                        </span>
+                        <span id="rating-display" class="ms-3 text-muted">({{ movie.rating }}/5)</span>
+                        <!-- Hidden input to hold the actual value to be submitted -->
+                        <input type="hidden" name="rating" id="rating-input" value="{{ movie.rating }}">
+                    </div>
+                </div>
+
+                <!-- Plot/Review Textarea -->
                 <div class="mb-3">
                     <label for="plot" class="form-label">Your Personal Review/Notes (Edit Plot)</label>
                     <!-- Pre-populate textarea with current plot/review content -->
@@ -46,13 +76,78 @@
                     <div class="form-text">You can use this field to add a personal review or update the summary.</div>
                 </div>
 
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a href="{{ url_for('movie_list') }}" class="btn btn-outline-secondary">Cancel and Go Back</a>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg shadow">Save Changes</button>
+                    <a href="{{ url_for('movie_list') }}" class="btn btn-outline-secondary btn-lg">Cancel and Go Back</a>
                 </div>
             </form>
 
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const starsContainer = document.querySelector('.star-rating .stars');
+        const stars = starsContainer.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating-input');
+        const ratingDisplay = document.getElementById('rating-display');
+
+        // 1. Function to visually set the stars and update display text
+        function setStars(rating) {
+            stars.forEach(star => {
+                const starValue = parseInt(star.dataset.value);
+                if (starValue <= rating) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+            // Update display text
+            ratingDisplay.textContent = `(${rating}/5)`;
+        }
+
+        // Set initial state from the value fetched from the database
+        setStars(parseInt(ratingInput.value));
+
+        // 2. Click Handler
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                let clickedRating = parseInt(this.dataset.value);
+
+                // If the user clicks the star that is currently the only selected one,
+                // treat it as a click to un-rate (set to 0), otherwise set to clickedRating.
+                if (clickedRating === 1 && parseInt(ratingInput.value) === 1) {
+                    clickedRating = 0;
+                } else if (clickedRating === parseInt(ratingInput.value)) {
+                    // Clicking the currently selected rating again maintains that rating
+                    // unless it's the 1-star case above.
+                }
+
+                ratingInput.value = clickedRating;
+                setStars(clickedRating);
+            });
+        });
+
+        // 3. Hover Effect (UX improvement)
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const hoverRating = parseInt(this.dataset.value);
+                stars.forEach(s => {
+                    const sValue = parseInt(s.dataset.value);
+                    if (sValue <= hoverRating) {
+                        s.classList.add('hovered');
+                    } else {
+                        s.classList.remove('hovered');
+                    }
+                });
+            });
+
+            star.addEventListener('mouseout', function() {
+                // Remove all hover styles when leaving a star
+                stars.forEach(s => s.classList.remove('hovered'));
+            });
+        });
+    });
+</script>
 {% endblock %}

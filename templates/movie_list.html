@@ -6,21 +6,46 @@
     <title>My Movie List - {{ g.user.username }}</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Load Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Keeping the local style link just in case, though Tailwind is preferred -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* The render_stars function uses plain Unicode stars (★ and ☆),
+           so we don't need the specific Font Awesome classes here,
+           but we can style the text color if needed. */
+        .rating-text {
+             /* Use an amber color for the star text for visibility */
+            color: #F59E0B; /* Tailwind amber-500 */
+            font-size: 1.5rem; /* Make the stars stand out */
+            letter-spacing: 2px;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<!-- Shifted background to a deep slate blue for a dark theme -->
+<body class="bg-slate-900 min-h-screen font-sans text-gray-100">
 
-    <!-- Primary Application Header (Consistent with add_movie.html) -->
-    <header class="bg-indigo-700 shadow-lg sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-white">Movie Tracker</h1>
+    <!-- Primary Application Header (Deep Blue Theme) -->
+    <header class="bg-gray-900 shadow-xl sticky top-0 z-10 border-b-4 border-cyan-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+
+            <!-- Logo/Branding Section (Upper Left Corner) -->
+            <div class="flex items-center space-x-3">
+                <!-- Placeholder Logo Image (Amber/Gold Accent) -->
+                <img src="https://placehold.co/40x40/f97316/ffffff?text=M" alt="MoviWeb Logo" class="rounded-full shadow-lg border-2 border-amber-400">
+                <!-- Stylized Title with Cyan/Amber color split -->
+                <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">Movi<span class="text-amber-400">Tracker</span></h1>
+            </div>
+
             <nav class="flex items-center space-x-4">
-                <span class="text-white text-sm font-medium hidden sm:inline">
-                    Logged in as: <strong class="text-indigo-200">{{ g.user.username }}</strong>
+                <span class="text-gray-300 text-sm font-medium hidden sm:inline">
+                    Logged in as: <strong class="text-cyan-400">{{ g.user.username }}</strong>
                 </span>
+                <!-- Updated 'Change User' button with icon and darker style -->
                 <a href="{{ url_for('user_select') }}"
-                   class="px-3 py-1.5 bg-indigo-500 text-white rounded-full text-sm font-semibold hover:bg-indigo-400 transition duration-150">
-                    Change User
+                   class="px-3 py-1.5 bg-gray-700 text-white rounded-full text-sm font-semibold hover:bg-gray-600 transition duration-150 flex items-center">
+                   <i class="fas fa-user-circle mr-2"></i>
+                   Change User
                 </a>
             </nav>
         </div>
@@ -28,17 +53,18 @@
 
     <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        <!-- Main Content Wrapper (Consistent with add_movie.html) -->
-        <div class="w-full max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 sm:p-8 space-y-8">
+        <!-- Main Content Wrapper (Dark card background) -->
+        <div class="w-full max-w-4xl mx-auto bg-gray-800 shadow-2xl rounded-2xl p-6 sm:p-8 space-y-8">
 
             <!-- Title and Add Button -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4">
-                <h2 class="text-3xl font-extrabold text-gray-800">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-700 pb-4">
+                <h2 class="text-3xl font-extrabold text-white">
                     Your Watch List
                 </h2>
+                <!-- Add Button (Using Amber Accent Color and Icon) -->
                 <a href="{{ url_for('movie_add') }}"
-                   class="bg-green-600 text-white font-medium py-2.5 px-5 rounded-xl hover:bg-green-700 transition duration-150 shadow-lg mt-3 sm:mt-0 inline-flex items-center transform hover:scale-[1.02]">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                   class="bg-amber-500 text-gray-900 font-bold py-2.5 px-5 rounded-full hover:bg-amber-400 transition duration-150 shadow-xl mt-3 sm:mt-0 inline-flex items-center transform hover:scale-[1.02]">
+                    <i class="fas fa-plus-circle mr-2"></i>
                     Add a New Movie
                 </a>
             </div>
@@ -47,46 +73,58 @@
             <div class="space-y-6">
                 {% if movies %}
                     {% for movie in movies %}
-                    <!-- Movie Card (Similar look to search result card) -->
-                    <div class="p-4 border border-gray-200 rounded-xl flex flex-col sm:flex-row gap-4 bg-white shadow-md hover:shadow-lg transition duration-300">
-                        <img src="{{ movie.poster_url | default('https://placehold.co/120x180/8b5cf6/ffffff?text=No+Poster', true) }}"
+                    <!-- Movie Card (Dark background, subtle border, large shadow) -->
+                    <div class="p-4 border border-gray-700 rounded-xl flex flex-col sm:flex-row gap-4 bg-gray-900 shadow-xl hover:border-cyan-400 transition duration-300">
+
+                        <img src="{{ movie.poster_url | default('https://placehold.co/120x180/1f2937/ffffff?text=No+Poster', true) }}"
                              alt="Poster for {{ movie.title }}"
                              class="w-24 h-36 rounded-lg shadow-md flex-shrink-0 object-cover mx-auto sm:mx-0"
-                             onerror="this.onerror=null;this.src='https://placehold.co/120x180/8b5cf6/ffffff?text=No+Poster';">
+                             onerror="this.onerror=null;this.src='https://placehold.co/120x180/1f2937/ffffff?text=No+Poster';">
 
                         <div class="flex-grow space-y-2">
-                            <h3 class="text-xl font-bold text-gray-800">{{ movie.title }} ({{ movie.year }})</h3>
+                            <h3 class="text-xl font-bold text-cyan-400">{{ movie.title }} ({{ movie.year }})</h3>
 
                             <!-- Status & Rating Badges -->
                             <div class="flex items-center space-x-3 text-sm">
+
+                                <!-- Status Badge (Updated Colors for Dark Theme) -->
                                 <span class="px-3 py-1 rounded-full font-semibold
-                                    {% if movie.status == 'Watched' %} bg-indigo-100 text-indigo-700
-                                    {% elif movie.status == 'Watching' %} bg-yellow-100 text-yellow-700
-                                    {% else %} bg-gray-100 text-gray-700
+                                    {% if movie.status == 'Watched' %} bg-cyan-800 text-cyan-200
+                                    {% elif movie.status == 'Watching' %} bg-yellow-800 text-yellow-200
+                                    {% else %} bg-gray-700 text-gray-300
                                     {% endif %}">
                                     {{ movie.status }}
                                 </span>
-                                {% if movie.rating %}
-                                <span class="px-3 py-1 rounded-full bg-blue-600 text-white font-semibold">
-                                    Rating: {{ movie.rating }}/10
+
+                                <!-- NEW FIX: Rating Display Logic using the render_stars helper function -->
+                                {% set star_output = render_stars(movie.rating) %}
+
+                                <span class="rating-text" title="Rating: {{ star_output }}">
+                                    <!-- This will output: ★★★☆☆ or Unrated -->
+                                    {{ star_output }}
                                 </span>
-                                {% endif %}
+
+                                <!-- The old, complex Font Awesome loop has been replaced by the simple function call -->
+
                             </div>
 
-                            <p class="text-sm text-gray-600 line-clamp-2">{{ movie.plot }}</p>
+                            <p class="text-sm text-gray-400 line-clamp-2">{{ movie.plot }}</p>
 
                             <!-- Actions -->
                             <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                                <!-- Edit Button (Using Cyan Accent Color and Icon) -->
                                 <a href="{{ url_for('movie_update', movie_id=movie.id) }}"
-                                   class="bg-indigo-500 text-white text-sm py-2 px-4 rounded-xl hover:bg-indigo-600 transition duration-150 shadow-md">
+                                   class="bg-cyan-600 text-white text-sm py-2 px-4 rounded-xl font-medium hover:bg-cyan-500 transition duration-150 shadow-md flex items-center justify-center sm:justify-start">
+                                    <i class="fas fa-edit mr-2"></i>
                                     Edit Status/Rating
                                 </a>
 
-                                <!-- Delete Button (using a form for POST request) -->
+                                <!-- Delete Button (using a form for POST request, Red Color and Icon) -->
                                 <form method="POST" action="{{ url_for('movie_delete', movie_id=movie.id) }}" class="inline">
                                     <button type="submit"
                                             onclick="return confirm('Are you sure you want to delete {{ movie.title }}?')"
-                                            class="bg-red-500 text-white text-sm py-2 px-4 rounded-xl hover:bg-red-600 transition duration-150 shadow-md">
+                                            class="bg-red-700 text-white text-sm py-2 px-4 rounded-xl font-medium hover:bg-red-600 transition duration-150 shadow-md flex items-center justify-center sm:justify-start">
+                                        <i class="fas fa-trash-alt mr-2"></i>
                                         Delete
                                     </button>
                                 </form>
@@ -95,10 +133,10 @@
                     </div>
                     {% endfor %}
                 {% else %}
-                    <!-- Empty List Message -->
-                    <div class="p-10 text-center bg-indigo-50 rounded-xl border-2 border-dashed border-indigo-200">
-                        <p class="text-xl font-semibold text-indigo-700 mb-2">Your list is currently empty!</p>
-                        <p class="text-gray-600">Click the "Add a New Movie" button above to get started.</p>
+                    <!-- Empty List Message (Updated Colors for Dark Theme) -->
+                    <div class="p-10 text-center bg-gray-900 rounded-xl border-2 border-dashed border-cyan-500/50">
+                        <p class="text-xl font-semibold text-cyan-400 mb-2">Your list is currently empty!</p>
+                        <p class="text-gray-400">Click the "Add a New Movie" button above to get started.</p>
                     </div>
                 {% endif %}
             </div>
