@@ -22,7 +22,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('movie_add') }}">Add Movie</a>
                     </li>
-                    {% endif %}
                 </ul>
                 <span class="navbar-text">
                     {% if g.user %}
@@ -30,16 +29,13 @@
                         <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-danger ms-3">Logout</a>
                     {% else %}
                         <a href="{{ url_for('user_select') }}" class="btn btn-sm btn-outline-light">Select User</a>
-                    {% endif %}
                 </span>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        <!-- FLASH MESSAGES: This block retrieves and clears ALL flash messages from the session. -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
             <div class="mt-4">
             {% for category, message in messages %}
                 {% set bs_class = 'info' %}
@@ -47,14 +43,12 @@
                     {% set bs_class = 'success' %}
                 {% elif category == 'danger' %}
                     {% set bs_class = 'danger' %}
-                {% endif %}
                 <div class="alert alert-{{ bs_class }} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
             </div>
-        {% endif %}
         {% endwith %}
 
         {% block content %}{% endblock %}

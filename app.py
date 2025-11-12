@@ -5,7 +5,7 @@ from typing import Tuple, Optional, Dict, Any
 import requests
 import click
 from flask import Flask, render_template, request, redirect, url_for, \
-	session, g, flash
+	session, g, flash, get_flashed_messages
 
 from config import Config
 from models import db, User, Movie
@@ -17,7 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 def login_required(view):
-	"""View decorator that redirects anonymous users to the login page."""
+	"""
+	View decorator that redirects anonymous users to the login page.
+
+	Args:
+		view: The view function to be decorated
+
+	Returns:
+		The decorated view function
+	"""
 
 	@functools.wraps(view)
 	def wrapped_view(**kwargs):
@@ -30,16 +38,26 @@ def login_required(view):
 	return wrapped_view
 
 
-def get_omdb_details(api_key: str, omdb_url: str,
-					 movie_id: Optional[str] = None,
-					 title: Optional[str] = None) -> Tuple[
-	Optional[Dict[str, Any]], Optional[str]]:
+def get_omdb_details(
+		api_key: str,
+		omdb_url: str,
+		movie_id: Optional[str] = None,
+		title: Optional[str] = None
+) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
 	"""
 	Fetches movie details from the OMDb API.
+
+	Args:
+		api_key: OMDb API key
+		omdb_url: Base URL for OMDb API
+		movie_id: IMDb movie ID (optional)
+		title: Movie title to search (optional)
+
+	Returns:
+		Tuple of (data dict, error message)
 	"""
 	if api_key == 'YOUR_OMDB_API_KEY_FALLBACK':
-		return None, ("OMDb API Key is not configured. "
-					  "Please set OMDB_API_KEY environment variable.")
+		return None, "OMDb API Key is not configured. Please set OMDB_API_KEY environment variable."
 
 	params = {'apikey': api_key}
 
@@ -70,6 +88,12 @@ def get_omdb_details(api_key: str, omdb_url: str,
 def render_stars(rating: Optional[int]) -> str:
 	"""
 	Converts an integer rating (0-5) into a Unicode star string.
+
+	Args:
+		rating: Integer rating between 0 and 5
+
+	Returns:
+		String of filled and empty stars, or "Unrated"
 	"""
 	if rating is None or rating == 0:
 		return "Unrated"
@@ -87,7 +111,12 @@ def render_stars(rating: Optional[int]) -> str:
 
 
 def create_app():
-	"""Initializes and configures the Flask application."""
+	"""
+	Initializes and configures the Flask application.
+
+	Returns:
+		Configured Flask app instance
+	"""
 	app = Flask(__name__)
 	app.config.from_object(Config)
 	db.init_app(app)
@@ -95,22 +124,44 @@ def create_app():
 	# Register template helper function
 	app.jinja_env.globals.update(render_stars=render_stars)
 
+	# -------------------------------------------------------------------------
+	# CLI Commands
+	# -------------------------------------------------------------------------
+
 	@app.cli.command("init-db")
 	def init_db_command():
-		"""Initializes the database tables."""
+		"""Initialize the database tables."""
 		with app.app_context():
 			db.create_all()
 		click.echo('✓ Database initialized successfully.')
 
+	# -------------------------------------------------------------------------
+	# Before/After Request Hooks
+	# -------------------------------------------------------------------------
+
 	@app.before_request
 	def load_logged_in_user():
-		"""Loads the current user from session before each request."""
+		"""Load the current user from session before each request."""
 		user_id = session.get('user_id')
 		g.user = db.session.get(User, user_id) if user_id else None
 
+	@app.after_request
+	def cleanup_session(response):
+		"""
+		Clean up session and prevent flash message accumulation.
+		This ensures old messages don't persist across multiple redirects.
+		"""
+		# Remove any temporary error flags
+		session.pop('_error_500_flashed', None)
+		return response
+
+	# -------------------------------------------------------------------------
+	# User Management Routes
+	# -------------------------------------------------------------------------
+
 	@app.route('/')
 	def user_select():
-		"""Displays all users for selection."""
+		"""Display all users for selection."""
 		error = request.args.get('error')
 		users = DataManager.get_all_users()
 		return render_template('user_select.html', users=users,
@@ -118,18 +169,22 @@ def create_app():
 
 	@app.route('/register', methods=['POST'])
 	def register():
-		"""Handles the creation of a new user."""
+		"""Handle the creation of a new user."""
 		username = request.form.get('username', '').strip()
 
 		if not username:
-			return render_template('user_select.html',
-								   users=DataManager.get_all_users(),
-								   error="Username cannot be empty.")
+			return render_template(
+				'user_select.html',
+				users=DataManager.get_all_users(),
+				error="Username cannot be empty."
+			)
 
 		if len(username) > 80:
-			return render_template('user_select.html',
-								   users=DataManager.get_all_users(),
-								   error="Username is too long (max 80 characters).")
+			return render_template(
+				'user_select.html',
+				users=DataManager.get_all_users(),
+				error="Username is too long (max 80 characters)."
+			)
 
 		new_user, db_error = DataManager.create_user(username)
 
@@ -138,13 +193,15 @@ def create_app():
 			flash(f'Welcome, {new_user.username}!', 'success')
 			return redirect(url_for('movie_list'))
 		else:
-			return render_template('user_select.html',
-								   users=DataManager.get_all_users(),
-								   error=db_error or "User already exists.")
+			return render_template(
+				'user_select.html',
+				users=DataManager.get_all_users(),
+				error=db_error or "User already exists."
+			)
 
 	@app.route('/select_user/<int:user_id>')
 	def select_user(user_id):
-		"""Sets the selected user ID in the session."""
+		"""Set the selected user ID in the session."""
 		user = db.session.get(User, user_id)
 		if user:
 			session['user_id'] = user_id
@@ -155,7 +212,7 @@ def create_app():
 
 	@app.route('/logout')
 	def logout():
-		"""Clears the user ID from the session."""
+		"""Clear the user ID from the session."""
 		username = g.user.username if g.user else "User"
 		session.clear()
 		flash(f'Goodbye, {username}!', 'info')
@@ -163,7 +220,7 @@ def create_app():
 
 	@app.route('/delete_user/<int:user_id>', methods=['POST'])
 	def delete_user_route(user_id):
-		"""Deletes a user and all their associated movies."""
+		"""Delete a user and all their associated movies."""
 		logged_in_user_id = session.get('user_id')
 		success, error = DataManager.delete_user(user_id)
 
@@ -173,8 +230,10 @@ def create_app():
 			message = f"User (ID: {user_id}) and all their data were successfully deleted."
 			return redirect(url_for('user_select', error=message))
 		else:
-			return redirect(url_for('user_select',
-									error=f"Error deleting user: {error}"))
+			return redirect(
+				url_for('user_select',
+						error=f"Error deleting user: {error}")
+			)
 
 	# -------------------------------------------------------------------------
 	# Movie Management Routes
@@ -183,14 +242,14 @@ def create_app():
 	@app.route('/movies')
 	@login_required
 	def movie_list():
-		"""Displays the current user's movie list."""
+		"""Display the current user's movie list."""
 		movies = DataManager.get_user_movies(g.user.id)
 		return render_template('movie_list.html', movies=movies)
 
 	@app.route('/movies/add', methods=['GET', 'POST'])
 	@login_required
 	def movie_add():
-		"""Allows users to search for a movie and add it to their list."""
+		"""Allow users to search for a movie and add it to their list."""
 		search_result = None
 		error = None
 		message = None
@@ -212,9 +271,11 @@ def create_app():
 						'year': movie_data.get('Year', 'N/A'),
 						'director': movie_data.get('Director', 'N/A'),
 						'plot': movie_data.get('Plot', 'N/A'),
-						'poster_url': movie_data.get(
-							'Poster') if movie_data.get(
-							'Poster') != 'N/A' else None,
+						'poster_url': (
+							movie_data.get('Poster')
+							if movie_data.get('Poster') != 'N/A'
+							else None
+						),
 						'omdb_id': movie_data.get('imdbID')
 					}
 
@@ -225,7 +286,8 @@ def create_app():
 					if new_movie:
 						flash(
 							f'Successfully added "{new_movie.title}" to your list!',
-							'success')
+							'success'
+						)
 						return redirect(url_for('movie_list'))
 					else:
 						error = db_error
@@ -244,21 +306,26 @@ def create_app():
 					)
 
 					if search_result:
-						message = f"Found: {search_result.get('Title')} ({search_result.get('Year')})"
+						message = (
+							f"Found: {search_result.get('Title')} "
+							f"({search_result.get('Year')})"
+						)
 					else:
 						error = api_error
 				else:
 					error = "Please enter a movie title."
 
-		return render_template('add_movie.html',
-							   search_result=search_result,
-							   error=error,
-							   message=message)
+		return render_template(
+			'add_movie.html',
+			search_result=search_result,
+			error=error,
+			message=message
+		)
 
 	@app.route('/movies/delete/<int:movie_id>', methods=['POST'])
 	@login_required
 	def movie_delete(movie_id):
-		"""Deletes a movie from the user's list."""
+		"""Delete a movie from the user's list."""
 		success, error = DataManager.delete_movie(movie_id, g.user.id)
 
 		if success:
@@ -272,7 +339,7 @@ def create_app():
 			   methods=['GET', 'POST'])
 	@login_required
 	def movie_update(movie_id):
-		"""Handles updating a movie's details."""
+		"""Handle updating a movie's details."""
 		movie = db.session.get(Movie, movie_id)
 
 		if not movie or movie.user_id != g.user.id:
@@ -328,13 +395,16 @@ def create_app():
 						  'success')
 					return redirect(url_for('movie_list'))
 				else:
-					flash(db_error or 'Failed to update movie.',
-						  'danger')
+					# Only flash if there's an actual error message
+					if db_error:
+						flash(db_error, 'danger')
+					else:
+						flash('Failed to update movie.', 'danger')
 			else:
 				flash('No changes submitted.', 'info')
 				return redirect(url_for('movie_list'))
 
-		# GET request - display form
+		# GET request - display form (NO flash messages here)
 		return render_template('movie_update.html', movie=movie)
 
 	# -------------------------------------------------------------------------
@@ -343,8 +413,16 @@ def create_app():
 
 	@app.errorhandler(404)
 	def not_found(error):
-		"""Handle 404 errors."""
-		flash('Page not found.', 'danger')
+		"""
+		Handle 404 errors.
+		Silently redirect without flash message to avoid cluttering UI.
+		"""
+		# Log the error but don't flash to user
+		logger.warning(f"404 error: {request.url}")
+
+		# Redirect based on user status
+		if g.user:
+			return redirect(url_for('movie_list'))
 		return redirect(url_for('user_select'))
 
 	@app.errorhandler(500)
@@ -352,8 +430,15 @@ def create_app():
 		"""Handle 500 errors."""
 		db.session.rollback()
 		logger.error(f"Internal error: {error}")
-		flash('An internal error occurred. Please try again.',
-			  'danger')
+
+		# Only flash once per session
+		if not session.get('_error_500_flashed'):
+			flash('An internal error occurred. Please try again.',
+				  'danger')
+			session['_error_500_flashed'] = True
+
+		if g.user:
+			return redirect(url_for('movie_list'))
 		return redirect(url_for('user_select'))
 
 	return app
